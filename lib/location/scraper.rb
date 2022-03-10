@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require_relative "scraper/version"
 require_relative "./store"
+require_relative "./export"
 require 'nokogiri'
 require 'open-uri'
 require 'pry'
+require 'csv'
 
 class Scraper
-  attr_accessor :link, :base, :state_pages, :city_pages, :loc_pages
+  attr_accessor :link, :base, :state_pages, :city_pages, :loc_pages, :name
 
   def initialize(url,base)
     @link = url
@@ -17,12 +18,13 @@ class Scraper
     @loc_pages = []
   end
 
-  def self.scrape(link,base)
+  def self.scrape(link,base,name)
     a = Scraper.new(link,base)
     a.page_scrape_for_link(link)
-    #a.linked_pages_scrape
-    a.linked_pages_scrape_single_test
+    a.linked_pages_scrape
+    #a.linked_pages_scrape_single_test
     a.create_stores
+    a.csv_expo(name)
   end
 
   def page_scrape_for_link(link)
@@ -51,7 +53,8 @@ class Scraper
   end
 
   def create_stores
-    i = 0
+    i = 1
+    k = @loc_pages.length
     @loc_pages.each do |loc|
       loc = Nokogiri::HTML5(URI.open("#{base}#{loc}"))
         j = loc.css("li span")
@@ -62,10 +65,21 @@ class Scraper
           state: j[2].text,
           zip: j[3].text,
         }
-        a = Store.new(info)
+        Store.new(info)
         i += 1
-      binding.pry
+        puts "Store #{i}/#{k}"
+      #binding.pry
     end
+  end
+
+  def csv_expo(name)
+    c = CSV.open("#{name}.csv", "w")
+    #csv << headers
+    c << ["IDnum", "Address", "City", "State", "ZIP"]
+    Store.all.each do |loc|
+      c << [loc.idnum, loc.address, loc.city, loc.state, loc.zip]
+    end
+    c.close()
   end
 
   def linked_pages_scrape
@@ -100,30 +114,10 @@ class Scraper
     @loc_pages.uniq
   end
 
-
-
-
-
-
-
-
-  def page_scrape_by_link_haverty
-    doc = Nokogiri::HTML5(URI.open(@link))
-    att = doc.css(".storeDetails").css("span")
-    #binding.pry
-  end
-  def progress
-    0.step(100, 5) do |i|
-      printf("\rProgress: [%-20s]", "=" * (i/5))
-      sleep(0.5)
-    end
-    puts
-  end
-
 end
 
 #gary = Scraper.new("https://www.havertys.com/furniture/allstores")
 #gary = Scraper.new("https://storefound.org/do-it-best-store-hours-locations")
 #gary.whole_pull
 
-Scraper.scrape("https://storefound.org/do-it-best-store-hours-locations","https://storefound.org")
+Scraper.scrape("https://storefound.org/do-it-best-store-hours-locations","https://storefound.org","Do-it-best-test")

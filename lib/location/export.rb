@@ -1,9 +1,13 @@
-require_relative "scraper/version"
-require 'nokogiri'
-require 'open-uri'
+
+require_relative "store"
+require_relative "scraper"
 require 'pry'
+require 'csv'
 
-#takes store instances and exports to google sheets
-class Export 
 
-def
+#films_info is an array of arrays
+headers = ["Rank", "Title", "Genre", "Description", "Director", "Actors", "Year", "Runtime (Minutes)", "Rating", "Votes", "Revenue (Millions)", "Metascore"]
+
+c = CSV.open("TEST", "w")
+#csv << headers
+  c << headers

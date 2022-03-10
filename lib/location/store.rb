@@ -1,4 +1,4 @@
-require_relative "scraper/version"
+
 require 'nokogiri'
 require 'open-uri'
 require 'pry'
