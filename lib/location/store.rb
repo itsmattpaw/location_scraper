@@ -6,5 +6,19 @@ require 'pry'
 #takes scraped data and creates store class instance
 #saves all store class instances to be exported
 class Store
+    attr_accessor :idnum, :address, :city, :state, :zip 
+    @@all = []
 
-def
+    def initialize(idnum:,address:,city:,state:,zip:)
+        @idnum = idnum
+        @address = address
+        @city = city
+        @state = state
+        @zip = zip
+        @@all << self
+    end
+
+    def self.all
+        @@all
+    end
+end
