@@ -7,26 +7,16 @@ require 'pry'
 require 'csv'
 
 class Scraper
-  attr_accessor :link, :base, :state_pages, :city_pages, :loc_pages, :name
-
-  def initialize(url,base,name)
-    @link = url
-    @base = base
-    @name = name
-    @state_pages = []
-    @city_pages = []
-    @loc_pages = []
-  end
 
   def scrape
-    page_scrape_for_link(@link)
+    page_scrape(@link)
     #linked_pages_scrape
-    linked_pages_scrape_single_test
+    linked_page_scrape_single_test
     create_stores
     csv_expo
   end
 
-  def page_scrape_for_link(page)
+  def page_scrape(page)
     #finds additional links to follow and sorts into arrays
     doc = Nokogiri::HTML5(URI.open(page))
     doc.css(".main-block a").each do |lk|
@@ -43,16 +33,10 @@ class Scraper
     dedupe_all
   end
 
-  def linked_pages_scrape_single_test
-    @loc_pages.clear
-    page_scrape_for_link("#{@base}#{@state_pages[0]}")
-    page_scrape_for_link("#{@base}#{@city_pages[0]}")
-  end
-
-  def linked_pages_scrape(array)
+  def linked_page_scrape(array)
     i = 1
     array.each do |page|
-      page_scrape_for_link("#{@base}#{page}")
+      page_scrape("#{@base}#{page}")
       progress_perc(i, array.length)
       i += 1
     end
@@ -98,9 +82,5 @@ class Scraper
 
 end
 
-#gary = Scraper.new("https://www.havertys.com/furniture/allstores")
-#gary = Scraper.new("https://storefound.org/do-it-best-store-hours-locations")
-#gary.whole_pull
-
-gary = Scraper.new("https://storefound.org/do-it-best-store-hours-locations","https://storefound.org","Do-it-best-test")
+gary = Scraper.new("https://storefound.org/do-it-best-store-hours-locations","Do-it-best-test")
 gary.scrape
